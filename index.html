@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <title>Graduation Template</title>
@@ -45,6 +45,102 @@ header.w3-container.w3-center.w3-padding-48 h6 {
 @keyframes floatSlow {0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
 .subscribe-block .subscribe-img.pulse {animation:floatSlow 3.6s ease-in-out infinite;}
 
+/* Valentine theme toggle */
+.valentine-toggle {
+  background:#ff4d79 !important;
+  color:#fff !important;
+  border:none;
+}
+.valentine-toggle:hover {
+  background:#e43f69 !important;
+}
+.valentine-toggle {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.valentine-toggle:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 20px rgba(194, 24, 91, 0.25);
+}
+body.valentine-theme {
+  background: linear-gradient(180deg, #fff0f5 0%, #ffe6ee 100%);
+}
+body.valentine-theme .w3-black {
+  background-color:#c2185b !important;
+  color:#fff !important;
+}
+body.valentine-theme .w3-dark-grey {
+  background-color:#ad1457 !important;
+}
+body.valentine-theme .w3-tag {
+  background-color:#ff8fb1 !important;
+  color:#5d1032 !important;
+}
+body.valentine-theme .congrats-title {
+  background:linear-gradient(90deg,#ff5f8f,#d81b60);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+body.valentine-theme .w3-white {
+  box-shadow:0 8px 24px rgba(216, 27, 96, 0.15);
+}
+body.valentine-theme .valentine-toggle {
+  animation: pulseHeart 1.3s ease-in-out infinite;
+}
+
+.heart-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+.love-icon {
+  position: absolute;
+  bottom: -30px;
+  opacity: 0.85;
+  animation-name: heartFloat;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  text-shadow: 0 2px 6px rgba(194, 24, 91, 0.22);
+}
+.love-icon.heart {
+  color: #ff4d79;
+}
+.love-icon.cat {
+  color: #ff9aa2;
+  animation-name: catFloat;
+}
+
+@keyframes pulseHeart {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+@keyframes heartFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(var(--heart-scale, 1));
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-120vh) translateX(var(--heart-drift, 0px)) scale(calc(var(--heart-scale, 1) + 0.2));
+    opacity: 0;
+  }
+}
+@keyframes catFloat {
+  0% {
+    transform: translateY(0) translateX(0) rotate(-5deg) scale(var(--heart-scale, 1));
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-60vh) translateX(calc(var(--heart-drift, 0px) * 0.55)) rotate(8deg) scale(calc(var(--heart-scale, 1) + 0.05));
+  }
+  100% {
+    transform: translateY(-120vh) translateX(var(--heart-drift, 0px)) rotate(-8deg) scale(calc(var(--heart-scale, 1) + 0.15));
+    opacity: 0;
+  }
+}
+
+
 /* Mobile adjustments: ensure lily doesn't overlap text or the close button */
 @media (max-width:600px) {
   .lily { top:220px; width:160px; }
@@ -52,9 +148,12 @@ header.w3-container.w3-center.w3-padding-48 h6 {
   .congrats-wrap > p { margin-top:320px !important; }
   .subscribe-block .subscribe-img { max-width:280px; }
 }
+
+
 </style>
 </head>
 <body class="w3-light-grey">
+<div id="heartLayer" class="heart-layer" aria-hidden="true"></div>
 <div id="graduation">
 <!-- Navigation bar with social media icons -->
 <div class="w3-bar w3-black w3-hide-small">
@@ -81,6 +180,7 @@ and is wrapped around the whole page content, except for the footer in this exam
       <h1 class="w3-text-white">V</h1>
       <h1 class="w3-jumbo w3-text-white w3-hide-small"><b>The Graduate</b></h1>
       <h6><button class="w3-button w3-white w3-padding-large w3-large w3-opacity w3-hover-opacity-off" onclick="document.getElementById('subscribe').style.display='block'">Click here</button></h6>
+      <h6><button id="valentineBtn" class="w3-button w3-padding-large w3-large valentine-toggle" onclick="toggleValentineTheme()">Valentine Theme</button></h6>
     </div>
   </header>
 
@@ -244,6 +344,8 @@ and is wrapped around the whole page content, except for the footer in this exam
 <script>
 // Toggle between hiding and showing blog replies/comments
 document.getElementById("myBtn").click();
+var heartInterval = null;
+
 function myFunction(id) {
   var x = document.getElementById(id);
   if (x.className.indexOf("w3-show") == -1) {
@@ -257,7 +359,57 @@ function likeFunction(x) {
   x.style.fontWeight = "bold";
   x.innerHTML = "✓ Liked";
 }
+
+function toggleValentineTheme() {
+  var body = document.body;
+  var btn = document.getElementById("valentineBtn");
+  body.classList.toggle("valentine-theme");
+  if (body.classList.contains("valentine-theme")) {
+    btn.innerHTML = "Default Theme";
+    startHeartEffect();
+  } else {
+    btn.innerHTML = "Valentine Theme";
+    stopHeartEffect();
+  }
+}
+
+function startHeartEffect() {
+  if (heartInterval) return;
+  var layer = document.getElementById("heartLayer");
+  if (!layer) return;
+  heartInterval = setInterval(function() {
+    spawnLoveIcon(layer);
+  }, 320);
+}
+
+function stopHeartEffect() {
+  var layer = document.getElementById("heartLayer");
+  clearInterval(heartInterval);
+  heartInterval = null;
+  if (layer) layer.innerHTML = "";
+}
+
+function spawnLoveIcon(layer) {
+  if (!layer) return;
+  var icon = document.createElement("span");
+  var hearts = ["\u2764", "\uD83D\uDC95", "\uD83D\uDC96", "\uD83D\uDC97"];
+  var cats = ["\uD83D\uDE3A", "\uD83D\uDE3B", "\uD83D\uDE38", "\uD83D\uDC31"];
+  var isCat = Math.random() < 0.35;
+  var iconSet = isCat ? cats : hearts;
+  icon.className = "love-icon " + (isCat ? "cat" : "heart");
+  icon.textContent = iconSet[Math.floor(Math.random() * iconSet.length)];
+  icon.style.left = Math.random() * 100 + "vw";
+  icon.style.fontSize = (14 + Math.random() * 20) + "px";
+  icon.style.animationDuration = (2.8 + Math.random() * 2.5) + "s";
+  icon.style.setProperty("--heart-scale", (0.8 + Math.random() * 0.85).toFixed(2));
+  icon.style.setProperty("--heart-drift", ((Math.random() * 110) - 55).toFixed(0) + "px");
+  layer.appendChild(icon);
+  icon.addEventListener("animationend", function() {
+    icon.remove();
+  });
+}
 </script>
 
 </body>
 </html>
+
